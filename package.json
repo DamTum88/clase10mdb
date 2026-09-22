@@ -1,0 +1,21 @@
+{
+  "name": "clase10",
+  "version": "1.0.0",
+  "description": "un simple cli de mongodb + node",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch ./src/index.ts",
+    "start": "node ./dist/index.js",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "mongoose": "^9.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2"
+  }
+}
