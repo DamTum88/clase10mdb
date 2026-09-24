@@ -23,7 +23,6 @@ interface IProduct {
 
 // CREACION DEL ESQUEMA PARA EL PRODUCTO
 const productSchema = new mongoose.Schema<IProduct>({
-
         name: String,
         price: Number,
         stock: Number,
@@ -33,11 +32,26 @@ const productSchema = new mongoose.Schema<IProduct>({
 // MODELO DEL PRODUCTO
 const Product = mongoose.model("product", productSchema)
 
-const getProducts = async () => {
-  return await Product.find()
+const generateError = (message: string, name: string) => {
+   const error = new Error(message)
+    error.name = name
+    return error
+}
+
+const handleError = (error: Error) => {
+        if(error.name === "CastError") {
+            return "ID invalido" 
+        } 
+
+        if (error.name === "ProductNotFound"){
+            return error.message
+                }
 }
 
 
+const getProducts = async () => {
+  return await Product.find()
+}
 
 const getProduct = async (id:string | undefined) => {
 
@@ -53,15 +67,12 @@ const getProduct = async (id:string | undefined) => {
 
     const foundProduct = await Product.findById(id)
     
-    if(!foundProduct){ 
-        throw new Error("Product Not Found")
-    }
-
+    if(!foundProduct) throw generateError("Product Not Found", "ProductNotFound")
     return foundProduct
     } catch (error) {
-        if(error instanceof Error) {
-            console.log(error.message)
-        }
+        const e = error as Error
+        handleError(e)
+    
     }
 }
 
@@ -73,7 +84,25 @@ const updateProduct = async (id:string, updates: string[]) => {
 
 }
 
-const deleteProduct = async (id: string) => {
+const deleteProduct = async (id: string | undefined) => {
+
+    try { 
+        if(!id) {
+            await Product.deleteMany({})
+            return "Products deleted saccefully"
+        }
+
+    const deletedProduct = await Product.findByIdAndDelete(id)    
+
+    if(!deletedProduct) throw generateError("Product Not Found", "ProductNotFound")
+    return deletedProduct
+    } catch (error) {
+        const e = error as Error
+        handleError(e)
+
+
+
+}
 
 }
 
@@ -91,6 +120,9 @@ const main = async () => {
             break
         case "show":
             console.log(await getProduct(args[1]))
+            break
+        case "delete":
+            console.log(await deleteProduct(args[1]))
             break
 
              
