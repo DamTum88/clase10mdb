@@ -4,11 +4,10 @@ dotenv.config()
 
 const URI_DB = process.env.URI_DB || ""
 
-
 const connectDb = async (URI:string) =>{
     try {
         await connect(URI)
-        console.log("conectado exitosamente a mongodb")
+        //console.log("conectado exitosamente a mongodb")
     } catch (error) { 
         console.log("error al conectarse")
     }
@@ -71,12 +70,41 @@ const getProduct = async (id:string | undefined) => {
     return foundProduct
     } catch (error) {
         const e = error as Error
-        handleError(e)
+        return handleError(e)
     
     }
 }
 
-const createProduct = async (data: IProduct) => {
+const createProduct = async (data: string[]) => {
+    const newProduct: IProduct = {
+        name: "producto",
+        price: 0,
+        stock: 0,
+        category: "sin categoria"
+    }
+ 
+    
+    for (let i = 0; i < data.length; i++) {
+        const prop = data[i]?.split("=") as string[]
+        if (prop[i] === "name") newProduct.name = prop[i + 1] as string
+        
+    }
+    
+    
+   
+   /*   if (data[0]?.replace("--","") !== "name") {
+       console.log("Name is required") 
+       return
+    }
+    
+    for (let index = 0; index < data.length; index += 2) {
+        const prop = data[index]?.replace("--","")
+        const value = data[index + 1] as string
+
+        if (prop === "name") newProduct.name = value   
+    }
+
+       console.log(newProduct) */ 
 
 }
 
@@ -99,24 +127,18 @@ const deleteProduct = async (id: string | undefined) => {
     } catch (error) {
         const e = error as Error
         handleError(e)
-
-
-
-}
-
+    }
 }
 
 const args = process.argv.splice(2)
 const action = args[0]
 
-
-
 const main = async () => {
     await connectDb(URI_DB)
 
     switch (action) {
-        case "showAll":
-            console.log(await getProducts())
+        case "create":
+            console.log(await createProduct(args.splice(1)))
             break
         case "show":
             console.log(await getProduct(args[1]))
@@ -125,12 +147,10 @@ const main = async () => {
             console.log(await deleteProduct(args[1]))
             break
 
-             
-        default:
+           default:
             break;
     }
-
-  await disconnect()
+        await disconnect()
 }
 
 
