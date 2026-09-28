@@ -26,6 +26,8 @@ const productSchema = new mongoose.Schema<IProduct>({
         price: Number,
         stock: Number,
         category: String
+}, {
+    versionKey: false
 })
 
 // MODELO DEL PRODUCTO
@@ -42,9 +44,7 @@ const handleError = (error: Error) => {
             return "ID invalido" 
         } 
 
-        if (error.name === "ProductNotFound"){
-            return error.message
-                }
+        return error.message
 }
 
 
@@ -71,28 +71,60 @@ const getProduct = async (id:string | undefined) => {
     } catch (error) {
         const e = error as Error
         return handleError(e)
-    
     }
 }
 
 const createProduct = async (data: string[]) => {
-    const newProduct: IProduct = {
+    try {
+        const newProduct: IProduct = {
         name: "producto",
         price: 0,
         stock: 0,
         category: "sin categoria"
     }
  
+    if (data[0]?.split("=")[0] !== "name") {
+    console.log("Name is required")
+     return
+    }
     
     for (let i = 0; i < data.length; i++) {
         const prop = data[i]?.split("=") as string[]
-        if (prop[i] === "name") newProduct.name = prop[i + 1] as string
-        
+        const nameProp = prop[0]
+        const value = prop[1]
+
+    switch (nameProp) {
+    case "name":
+      newProduct.name = value ? value : newProduct.name
+      break
+    case "price":
+      newProduct.price = value ? Number(value) : newProduct.price
+      break
+    case "stock":
+      newProduct.stock = value ? Number(value) : newProduct.stock
+      break
+    case "category":
+      newProduct.category = value ? value : newProduct.category
+      break
+
+      default:
+        throw generateError("Invalidad Data to create Product", "InvalidadData")
+        }
     }
-    
+
+        return Product.create(newProduct)
+        
+    }   catch (error) { 
+
+        const e = error as Error
+        return handleError(e)
+    }
+
+
+
     
    
-   /*   if (data[0]?.replace("--","") !== "name") {
+    /*   if (data[0]?.replace("--","") !== "name") {
        console.log("Name is required") 
        return
     }
@@ -108,8 +140,24 @@ const createProduct = async (data: string[]) => {
 
 }
 
-const updateProduct = async (id:string, updates: string[]) => {
+const updateProduct = async (id: string | undefined, updates: string[]) => {
+    
+    try {
+        const data: Partial<IProduct> = {} 
+        console.log("dentro de update")
 
+        for(const update of updates) {
+            const [prop, value] = update.split("=")
+            console.log(prop)
+            console.log(value) 
+
+        }
+
+
+        //return await Product.findByIdAndUpdate(id, data)
+    } catch (error) {
+        
+    }
 }
 
 const deleteProduct = async (id: string | undefined) => {
@@ -143,6 +191,8 @@ const main = async () => {
         case "show":
             console.log(await getProduct(args[1]))
             break
+        case "update":
+            console.log(updateProduct(args[1], args))
         case "delete":
             console.log(await deleteProduct(args[1]))
             break
