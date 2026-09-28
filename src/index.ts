@@ -43,9 +43,8 @@ const handleError = (error: Error) => {
         if(error.name === "CastError") {
             return "ID invalido" 
         } 
-
         return error.message
-}
+    }
 
 
 const getProducts = async () => {
@@ -150,12 +149,11 @@ const updateProduct = async (id: string | undefined, updates: string[]) => {
             const [prop, value] = update.split("=")
             console.log(prop)
             console.log(value) 
-
         }
-
-
-        //return await Product.findByIdAndUpdate(id, data)
+      //return await Product.findByIdAndUpdate(id, data)
     } catch (error) {
+        const e = error as Error 
+        return handleError(e)
         
     }
 }
