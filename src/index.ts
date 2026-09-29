@@ -7,7 +7,7 @@ const URI_DB = process.env.URI_DB || ""
 const connectDb = async (URI:string) =>{
     try {
         await connect(URI)
-        console.log("conectado exitosamente a mongodb")
+        
     } catch (error) {
         console.log("error al conectarse")
     }
