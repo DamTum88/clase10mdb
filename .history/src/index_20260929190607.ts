@@ -60,7 +60,7 @@ const getBook = async (id:string | undefined) => {
 
     const foundBook = await Book.findById(id)
 
-    if(!foundBook) throw generateError("Book Not Found","BookNotFound")
+    if(!foundBook) throw generateError("Book Not Found", "BookNotFound")
     return foundBook
     } catch (error) {
         const e = error as Error

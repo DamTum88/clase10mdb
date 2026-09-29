@@ -7,7 +7,7 @@ const URI_DB = process.env.URI_DB || ""
 const connectDb = async (URI:string) =>{
     try {
         await connect(URI)
-        console.log("conectado exitosamente a mongodb")
+        //console.log("conectado exitosamente a mongodb")
     } catch (error) {
         console.log("error al conectarse")
     }
@@ -60,7 +60,7 @@ const getBook = async (id:string | undefined) => {
 
     const foundBook = await Book.findById(id)
 
-    if(!foundBook) throw generateError("Book Not Found","BookNotFound")
+    if(!foundBook) throw generateError("Book Not Found", "BookNotFound")
     return foundBook
     } catch (error) {
         const e = error as Error
