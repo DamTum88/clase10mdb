@@ -1,4 +1,4 @@
-import mongoose, {connect, disconnect} from "mongoose"
+import mongoose, {connect} from "mongoose"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -13,25 +13,25 @@ const connectDb = async (URI:string) =>{
     }
 }
 
-interface IProduct {
-    name: string
-    price: number
-    stock: number
-    category: string
+interface IMovie {
+    title: string
+    year: number
+    director: string
+    genre: string
 }
 
-// CREACION DEL ESQUEMA PARA EL PRODUCTO
-const productSchema = new mongoose.Schema<IProduct>({
-        name: String,
-        price: Number,
-        stock: Number,
-        category: String
+// CREACION DEL ESQUEMA PARA LA PELICULA
+const movieSchema = new mongoose.Schema<IMovie>({
+        title: String,
+        year: Number,
+        director: String,
+        genre: String
 }, {
     versionKey: false
 })
 
-// MODELO DEL PRODUCTO
-const Product = mongoose.model("product", productSchema)
+// MODELO DE LA PELICULA
+const Movie = mongoose.model("Movie", movieSchema)
 
 const generateError = (message: string, name: string) => {
    const error = new Error(message)
@@ -46,45 +46,39 @@ const handleError = (error: Error) => {
         return error.message
     }
 
-
-const getProducts = async () => {
-  return await Product.find()
+const getMovies = async () => {
+  return await Movie.find()
 }
 
-const getProduct = async (id:string | undefined) => {
+const getMovie = async (id:string | undefined) => {
 
-    try {
-    const validateHex = /^[0-9a-fA-F]+$/
+    try { 
+        
     if (!id){
-        return Product.find({},{name: 1, _id: 1})
+        return Movie.find({},{title: 1, _id: 1})
     }
 
-   // if (id.length !== 24 || !validateHex.test(id)){
-   //     return "Invalid ID"
-   // }
-
-    const foundProduct = await Product.findById(id)
+    const foundMovie = await Movie.findById(id)
     
-    if(!foundProduct) throw generateError("Product Not Found", "ProductNotFound")
-    return foundProduct
+    if(!foundMovie) throw generateError("Movie Not Found", "MovieNotFound")
+    return foundMovie
     } catch (error) {
         const e = error as Error
         return handleError(e)
     }
 }
 
-const createProduct = async (data: string[]) => {
+const createMovie = async (data: string[]) => {
     try {
-        const newProduct: IProduct = {
-        name: "producto",
-        price: 0,
-        stock: 0,
-        category: "sin categoria"
+        const newMovie: IMovie = {
+        title: "sin titulo",
+        year: 0,
+        director: "desconocido",
+        genre: "sin genero"
     }
  
-    if (data[0]?.split("=")[0] !== "name") {
-    console.log("Name is required")
-     return
+    if (data[0]?.split("=")[0] !== "title") {
+    return "Title is required"
     }
     
     for (let i = 0; i < data.length; i++) {
@@ -93,25 +87,25 @@ const createProduct = async (data: string[]) => {
         const value = prop[1]
 
     switch (nameProp) {
-    case "name":
-      newProduct.name = value ? value : newProduct.name
+    case "title":
+      newMovie.title = value ? value : newMovie.title
       break
-    case "price":
-      newProduct.price = value ? Number(value) : newProduct.price
+    case "year":
+      newMovie.year = value ? Number(value) : newMovie.year
       break
-    case "stock":
-      newProduct.stock = value ? Number(value) : newProduct.stock
+    case "director":
+      newMovie.director = value ? (value) : newMovie.director
       break
-    case "category":
-      newProduct.category = value ? value : newProduct.category
+    case "genre":
+      newMovie.genre = value ? value : newMovie.genre
       break
 
       default:
-        throw generateError("Invalidad Data to create Product", "InvalidadData")
+        throw generateError("Invalid Data to create Movie", "InvalidData")
         }
     }
 
-        return Product.create(newProduct)
+        return Movie.create(newMovie)
         
     }   catch (error) { 
 
@@ -119,60 +113,61 @@ const createProduct = async (data: string[]) => {
         return handleError(e)
     }
 
-
-
-    
-   
-    /*   if (data[0]?.replace("--","") !== "name") {
-       console.log("Name is required") 
-       return
-    }
-    
-    for (let index = 0; index < data.length; index += 2) {
-        const prop = data[index]?.replace("--","")
-        const value = data[index + 1] as string
-
-        if (prop === "name") newProduct.name = value   
-    }
-
-       console.log(newProduct) */ 
-
 }
 
-const updateProduct = async (id: string | undefined, updates: string[]) => {
+const updateMovie = async (id: string | undefined, updates: string[]) => {
     
     try {
-        const data: Partial<IProduct> = {} 
-        console.log("dentro de update")
+        const data: Partial<IMovie> = {} 
+    
 
         for(const update of updates) {
             const [prop, value] = update.split("=")
-            console.log(prop)
-            console.log(value) 
-        }
-      //return await Product.findByIdAndUpdate(id, data)
-    } catch (error) {
-        const e = error as Error 
-        return handleError(e)
-        
-    }
+            
+            if(!value){
+                throw generateError(`Invalid data for ${prop}`, "InvalidData")
+            }
+
+            switch (prop) {
+                case "title":
+                    data.title = value
+                break
+                case "year":
+                    data.year = +value                   
+                break
+                 case "director":
+                    data.director = value
+                break
+                 case "genre":
+                    data.genre = value
+                    break;
+                default:
+                    throw generateError("Invalid data to update Movie", "InvalidData")
+                    break; }
+                    }
+                return await Movie.findByIdAndUpdate(id, data, { returnDocument: "after" })
+                }       
+                    catch (error) {
+                    const e = error as Error 
+                    return handleError(e)
+                }
 }
 
-const deleteProduct = async (id: string | undefined) => {
+const deleteMovie = async (id: string | undefined) => {
 
     try { 
         if(!id) {
-            await Product.deleteMany({})
-            return "Products deleted saccefully"
+            await Movie.deleteMany({})
+            return "Movies deleted saccessfully"
         }
 
-    const deletedProduct = await Product.findByIdAndDelete(id)    
+    const deletedMovie = await Movie.findByIdAndDelete(id)    
 
-    if(!deletedProduct) throw generateError("Product Not Found", "ProductNotFound")
-    return deletedProduct
+    if(!deletedMovie) throw generateError("Movie Not Found", "MovieNotFound")
+    return deletedMovie
     } catch (error) {
         const e = error as Error
-        handleError(e)
+        return handleError(e)
     }
 }
 
@@ -183,22 +178,34 @@ const main = async () => {
     await connectDb(URI_DB)
 
     switch (action) {
+        case "info":
+        console.log(`
+            show → para leer todas las películas
+            showOne id → para leer una película
+            create data → para crear una película
+            update id data → para actualizar una película
+            delete id → para borrar una película`)
+  break
         case "create":
-            console.log(await createProduct(args.splice(1)))
+            console.log(await createMovie(args.splice(1)))
             break
         case "show":
-            console.log(await getProduct(args[1]))
+            console.log(await getMovies())
+            break
+        case "showOne":
+            console.log(await getMovie(args[1]))
             break
         case "update":
-            console.log(updateProduct(args[1], args))
-        case "delete":
-            console.log(await deleteProduct(args[1]))
+            console.log(await updateMovie(args[1], args.slice(2)))
             break
-
-           default:
+        case "delete":
+            console.log(await deleteMovie(args[1]))
+            break
+        default:
+            console.log("commands: < info | create | show | showOne | update | delete> ")
             break;
     }
-        await disconnect()
+        await mongoose.disconnect()
 }
 
 
