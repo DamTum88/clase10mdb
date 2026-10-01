@@ -180,11 +180,11 @@ const main = async () => {
     switch (action) {
         case "info":
         console.log(`
-            show → para leer todos los libros
-            showOne id → para leer un libro
-            create data → para crear un libro
-            update id data → para actualizar un libro
-            delete id → para borrar un libro`)
+            show → para leer todos los libros.
+            showOne id → para leer un libro.
+            create data → para crear un libro.
+            update id data → para actualizar un libro.
+            delete id → para borrar un libro.`)
   break
         case "create":
             console.log(await createBook(args.splice(1)))
